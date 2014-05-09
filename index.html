@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<style type="text/css">
+	body {
+		margin:0px;
+		font-family: Helvetica;
+	}
+
+	#menu {
+		padding:15px;
+		margin:0px;
+		background-color:grey;		
+	}	
+
+	#target {
+		background:red;
+	}
+
+	.button{
+		display:inline;
+		position:relative;
+		padding:10px;
+		background:#009900;
+		color:white;
+		font-weight:bold;
+		font-family:Helvetica;
+	}
+
+	.scores {
+		display:none;
+	}
+
+	#scoreContainer{
+		text-align: center;
+	}
+
+	</style>
+
+	<script>
+		var start;
+		var count=0;
+		var best_scores;
+		var scoresList=[];
+		var scoresDict={};
+		var latestPlayer = "Anonymous";
+
+		function move(){
+			target = document.getElementById("target");
+			board = document.getElementById("board");
+			menu = document.getElementById("menu");
+
+			document.getElementById("board").style.height = window.innerHeight - menu.offsetHeight + "px";
+
+			x = Math.random() * (board.offsetWidth - target.offsetWidth)
+			y = Math.random() * (board.offsetHeight - target.offsetHeight)
+
+			document.getElementById("target").style.left = x + "px";
+			document.getElementById("target").style.top = y + "px";
+		}
+
+		move();
+
+		function restart() {
+			start=null;
+			count=0;
+			move();
+		}
+
+		function recordRanking(duration){
+			var person=prompt("Please enter your name",latestPlayer);
+			if (person==null)
+			{
+				person = "Anonymous";
+			}
+			latestPlayer = person;
+			rank=0;
+			scoresList.push(duration);
+			scoresDict[duration]={"name":person,"duration":duration}
+			scoresList.sort(function(a, b){return a-b});
+
+			if (scoresList.length > 5)
+			{
+				last = scoresList.pop();
+				delete scoresDict[last];
+			}
+		}
+
+		function printRanking(){
+			scoresList.sort();
+			scoreBoard = ""
+			for (var i=0,len=scoresList.length; i<len;i++)
+			{
+				score = scoresDict[scoresList[i]]
+				scoreBoard = scoreBoard + "<h2>" + (i+1) + " - " + score.name + " - " + score.duration + "ms<br>"
+			}
+			document.getElementById("scoreBoard").innerHTML=scoreBoard
+		}
+
+		function run() {
+			if (start==null){
+				start = (new Date()).getTime()		
+			}
+
+			count++;
+			if (count>9){
+				duration = (new Date()).getTime() - start;
+				alert("Congratulation!!! You made it in "+duration+"ms.");
+				recordRanking(duration)
+				alert("Try again "+ latestPlayer + "!");
+				restart();
+			}else{
+				move()
+			}
+		}
+
+		function change_mode_display(mode,display){		
+			elements = document.getElementsByClassName(mode);
+			for (var i=0,len=elements.length; i<len; i++)
+			{
+				elements[i].style.display=display;
+			}
+		}
+
+		function play(){
+			change_mode_display("play","inline");
+			change_mode_display("scores","none");
+		}
+
+		function scores(){
+			change_mode_display("play","none");
+			change_mode_display("scores","inline");
+			printRanking();
+		}
+
+	</script>
+
+</head>
+
+<body>
+	<div id="menu">
+		<div class="button play" onclick="restart()">Restart</div>
+		<div class="button play" onclick="scores()">Best scores</div>
+		<div class="button scores" onclick="play()">Play</div>
+	</div>
+
+	<div class="scores" id="scoreContainer">
+		<h1>Best scores</h1>
+		<div id="scoreBoard">
+		</div>
+	</div>
+
+	<div id="board">
+		<div id="target" class="button play" onclick="run()" style="left:20px;top:20px;">Click me 10 times as fast as you can!</div>
+	</div>
+</body>
